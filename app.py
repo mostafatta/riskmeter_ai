@@ -19,7 +19,7 @@ except ModuleNotFoundError:
     st.stop()
 
 # === UI Configuration ===
-st.set_page_config(page_title="Tadawul Risk AI", page_icon="📈", layout="wide")
+st.set_page_config(page_title="Tadawul Risk AI", page_icon="📈", layout="centered")
 
 # ============================================================
 # 🔥 CACHING LAYER
@@ -469,6 +469,9 @@ st.markdown("""
     #MainMenu {visibility:hidden;}
     footer {visibility:hidden;}
     header {visibility:hidden;}
+    /* Hide sidebar toggle — no sidebar used */
+    [data-testid="collapsedControl"] { display: none !important; }
+    section[data-testid="stSidebar"] { display: none !important; }
 
     /* ============================================
        MOBILE OVERRIDES  (≤ 640px)
@@ -546,40 +549,26 @@ load_ai_model()
 
 
 # ============================================================
-# 📋 SIDEBAR — Portfolio Builder
+# 📋 PORTFOLIO BUILDER — main page (works on mobile & desktop)
 # ============================================================
 
-with st.sidebar:
-    st.markdown("""
-    <div class="sidebar-header">
-        <h2>💼 Portfolio Builder</h2>
-        <p>Configure your stock portfolio below</p>
-    </div>
-    """, unsafe_allow_html=True)
+with st.expander("💼 Portfolio Builder — tap to configure", expanded=True):
 
     num_stocks = st.number_input(
         "Number of Stocks", min_value=1, max_value=10, value=1,
         help="Select how many stocks to include in your portfolio"
     )
 
-    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
-
     tickers = []
     weights = []
 
     for i in range(num_stocks):
-        st.markdown(f"""
-        <div style="
-            font-family:'Inter',sans-serif;
-            color:#93c5fd;
-            font-size:.85rem;
-            font-weight:600;
-            margin-bottom:.3rem;
-            letter-spacing:.5px;
-        ">STOCK {i+1}</div>
-        """, unsafe_allow_html=True)
-
-        col1, col2 = st.columns([2, 1])
+        st.markdown(
+            f'<div style="font-family:Inter,sans-serif;color:#93c5fd;font-size:.82rem;' +
+            f'font-weight:600;margin:.6rem 0 .2rem;letter-spacing:.5px;">STOCK {i+1}</div>',
+            unsafe_allow_html=True
+        )
+        col1, col2 = st.columns([3, 1])
         with col1:
             ticker = st.text_input(
                 "Ticker", value="2222.SR" if i == 0 else "",
@@ -606,44 +595,19 @@ with st.sidebar:
     is_valid = abs(total_weight - 100) < 1
     weight_color = "#4ade80" if is_valid else "#f87171"
     check_icon = "✓" if is_valid else "✗"
+    border_color = "rgba(34,197,94,.3)" if is_valid else "rgba(239,68,68,.3)"
 
-    st.markdown(f"""
-    <div style="
-        background:rgba(30,41,59,.5);
-        border:1px solid {'rgba(34,197,94,.3)' if is_valid else 'rgba(239,68,68,.3)'};
-        border-radius:10px;
-        padding:.8rem;
-        text-align:center;
-        margin:1rem 0;
-        font-family:'Inter',sans-serif;
-        transition: all .3s ease;
-    ">
-        <span style="color:rgba(200,210,230,.5); font-size:.75rem; text-transform:uppercase; letter-spacing:1px;">
-            Total Weight {check_icon}
-        </span><br>
-        <span style="color:{weight_color}; font-size:1.5rem; font-weight:700;">
-            {total_weight:.1f}%
-        </span>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        f'<div style="background:rgba(30,41,59,.5);border:1px solid {border_color};' +
+        f'border-radius:10px;padding:.7rem;text-align:center;margin:.8rem 0;">' +
+        f'<span style="color:rgba(200,210,230,.5);font-size:.72rem;text-transform:uppercase;letter-spacing:1px;">' +
+        f'Total Weight {check_icon}</span><br>' +
+        f'<span style="color:{weight_color};font-size:1.4rem;font-weight:700;">{total_weight:.1f}%</span>' +
+        f'</div>',
+        unsafe_allow_html=True
+    )
 
-    st.markdown("")
     analyze_button = st.button("🚀 Analyze Portfolio Risk", use_container_width=True)
-
-    st.markdown("""
-    <div style="
-        margin-top:2rem; padding-top:1rem;
-        border-top:1px solid rgba(100,150,255,.1);
-        text-align:center;
-        font-family:'Inter',sans-serif;
-        color:rgba(200,210,230,.3);
-        font-size:.7rem;
-    ">
-        Tadawul Risk AI v2.0<br>
-        Built with ❤️ using Streamlit<br>
-        <span style="color:rgba(139,92,246,.5);">⚡ Cache-accelerated</span>
-    </div>
-    """, unsafe_allow_html=True)
 
 
 # ============================================================
@@ -685,9 +649,9 @@ def get_prob_sublabel(cat):
 
 if analyze_button:
     if abs(sum(weights) - 1.0) > 0.01:
-        st.sidebar.error("⚠️ Total weights must equal 100%!")
+        st.error("⚠️ Total weights must equal 100%!")
     elif len(tickers) == 0:
-        st.sidebar.error("⚠️ Please enter at least one stock.")
+        st.error("⚠️ Please enter at least one stock.")
     else:
         start_time = time.time()
         progress_bar = st.progress(0)
@@ -948,7 +912,7 @@ else:
             color:rgba(200,210,230,.4);
             font-size:1.2rem;
             font-weight:500;
-        ">Configure your portfolio in the sidebar and click <strong>Analyze</strong></div>
+        ">Configure your portfolio above and click <strong>Analyze</strong></div>
         <div style="
             font-family:'Inter',sans-serif;
             color:rgba(200,210,230,.25);
