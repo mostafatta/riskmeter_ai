@@ -4,3 +4,4 @@ yfinance
 scikit-learn
 joblib
 streamlit
+altair<5
